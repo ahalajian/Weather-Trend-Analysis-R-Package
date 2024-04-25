@@ -1,0 +1,46 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-04-25"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+load("allweather.RData")
+library("dplyr")
+data
+
+
+
+```
+
+#function 1
+```{r}
+
+extract_time_series <- function(station, start = as.Date("2000-01-01"), end = as.Date("2024-05-07")){
+  this_station <- data |> filter(WBANNO == station & start <= LST_DATE & end >= LST_DATE)
+  return(this_station)
+}
+```
+
+#test case 1
+```{r}
+extract_time_series(53878, "2010-01-01", "2019-02-02")
+```
+
+
+#function 2
+
+```{r}
+yearly_cycle <- function(station){
+  data$day <- format(data[["LST_DATE"]], "%j")
+  data |> filter(WBANNO == station) |> group_by(day) |> summarize(expected_avg_temp = mean(T_DAILY_AVG))
+}
+
+yearly_cycle(53878)
+
+```
+

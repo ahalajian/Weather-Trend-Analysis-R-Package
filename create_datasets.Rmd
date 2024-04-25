@@ -59,3 +59,8 @@ data$LST_DATE <- as.Date(as.character(data[["LST_DATE"]]), format = "%Y%m%d")
 data <- replace(data, data == -9999 | data == -99, NA)
 ```
 
+#save data as r data file
+```{r}
+save(data, file = "allweather.RData")
+```
+
