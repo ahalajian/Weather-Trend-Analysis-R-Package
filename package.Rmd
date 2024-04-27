@@ -13,8 +13,6 @@ load("allweather.RData")
 library("dplyr")
 data
 
-
-
 ```
 
 #function 1
@@ -40,8 +38,75 @@ yearly_cycle <- function(station){
   data |> filter(WBANNO == station) |> group_by(day) |> summarize(expected_avg_temp = mean(T_DAILY_AVG, na.rm = TRUE))
 }
 
+```
+#test case 1
+```{r}
 yearly_cycle(53878)
 
+```
+#function 3
+```{r}
+trend_estimate <- function(){
+  data$year <- as.numeric(format(data[["LST_DATE"]], "%y"))
+  #data |> filter(WBANNO == station) |> group_by(day) |> summarize(expected_avg_temp = mean(T_DAILY_AVG, na.rm = TRUE))
+  model <- lm(T_DAILY_AVG ~ year, data = data)
+  temp_trend <- coef(model)[2]
+  return(temp_trend)
+}
+```
+
+```{r}
+trend_estimate()
+```
+#function 4
+```{r}
+
+library("maps")
+library("GpGp")
+library("fields")
+library("sp")
+
+```
+
+
+
+```{r}
+create_usa_grid <- function(resolution = 0.1) {
+  # Load the map data for the contiguous USA
+  usa_map <- map("usa", plot = FALSE)
+
+  # Extract the boundary coordinates of the contiguous USA
+  usa_boundary <- usa_map$range
+  
+  # Create a grid of points within the boundary
+  lon <- seq(usa_boundary[1], usa_boundary[2], by = resolution)
+  lat <- seq(usa_boundary[3], usa_boundary[4], by = resolution)
+  grid_points <- expand.grid(lon = lon, lat = lat)
+ 
+  inside_usa <- which(point.in.polygon(grid_points$lon, grid_points$lat, usa_map$x[1:6886], usa_map$y[1:6886]) == 1)
+  
+  
+  return(grid_points[inside_usa, ])
+}
+
+map_grids <- create_usa_grid(resolution = 1)
+map_grids
+
+usa_map$x[6887]
+usa_map$y[6887]
+
+resolution <- 0.1
+
+
+```
+
+
+```{r}
+station_points <- function(data){
+  return(unique(data$station_name))
+}
+
+station_points(data)
 ```
 
 ```{r}
