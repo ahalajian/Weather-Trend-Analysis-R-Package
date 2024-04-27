@@ -60,18 +60,12 @@ trend_estimate()
 ```
 #function 4
 ```{r}
-
 library("maps")
-library("GpGp")
-library("fields")
 library("sp")
-
 ```
 
-
-
 ```{r}
-create_usa_grid <- function(resolution = 0.1) {
+create_grid_pts <- function(resolution = 0.1) {
   # Load the map data for the contiguous USA
   usa_map <- map("usa", plot = FALSE)
 
@@ -88,72 +82,14 @@ create_usa_grid <- function(resolution = 0.1) {
   
   return(grid_points[inside_usa, ])
 }
-
-map_grids <- create_usa_grid(resolution = 1)
-map_grids
-
-usa_map$x[6887]
-usa_map$y[6887]
-
-resolution <- 0.1
-
-
 ```
 
 
 ```{r}
-station_points <- function(data){
-  return(unique(data$station_name))
-}
-
-station_points(data)
-```
-
-```{r}
-library("maps")
-library("GpGp")
-library("sp")
+create_grid_pts()
 ```
 
 
-```{r}
-
-create_usa_grid <- function(resolution = 0.1) {
-  # Load the map data for the contiguous USA
-  usa_map <- map("usa", plot = FALSE)
-
-  # Extract the boundary coordinates of the contiguous USA
-  usa_boundary <- usa_map$range
-  
-  # Create a grid of points within the boundary
-  lon <- seq(usa_boundary[1], usa_boundary[2], by = resolution)
-  lat <- seq(usa_boundary[3], usa_boundary[4], by = resolution)
-  grid_points <- expand.grid(lon = lon, lat = lat)
- 
-  inside_usa <- which(point.in.polygon(grid_points$lon, grid_points$lat, usa_map$x[1:6886], usa_map$y[1:6886]) == 1)
-  
-  
-  return(grid_points[inside_usa, ])
-}
-
-map_grids <- create_usa_grid(resolution = 1)
-map_grids
-
-usa_map$x[6887]
-usa_map$y[6887]
-
-resolution <- 0.1
-```
-
-
-```{r}
-map("usa")
-points(map_grids)
-```
-
-```{r}
-data
-```
 
 ```{r}
 interpolate_station_data <- function(){
