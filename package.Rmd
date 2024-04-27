@@ -37,10 +37,79 @@ extract_time_series(53878, "2010-01-01", "2019-02-02")
 ```{r}
 yearly_cycle <- function(station){
   data$day <- format(data[["LST_DATE"]], "%j")
-  data |> filter(WBANNO == station) |> group_by(day) |> summarize(expected_avg_temp = mean(T_DAILY_AVG))
+  data |> filter(WBANNO == station) |> group_by(day) |> summarize(expected_avg_temp = mean(T_DAILY_AVG, na.rm = TRUE))
 }
 
 yearly_cycle(53878)
 
+```
+
+```{r}
+library("maps")
+library("GpGp")
+library("sp")
+```
+
+
+```{r}
+
+create_usa_grid <- function(resolution = 0.1) {
+  # Load the map data for the contiguous USA
+  usa_map <- map("usa", plot = FALSE)
+
+  # Extract the boundary coordinates of the contiguous USA
+  usa_boundary <- usa_map$range
+  
+  # Create a grid of points within the boundary
+  lon <- seq(usa_boundary[1], usa_boundary[2], by = resolution)
+  lat <- seq(usa_boundary[3], usa_boundary[4], by = resolution)
+  grid_points <- expand.grid(lon = lon, lat = lat)
+ 
+  inside_usa <- which(point.in.polygon(grid_points$lon, grid_points$lat, usa_map$x[1:6886], usa_map$y[1:6886]) == 1)
+  
+  
+  return(grid_points[inside_usa, ])
+}
+
+map_grids <- create_usa_grid(resolution = 1)
+map_grids
+
+usa_map$x[6887]
+usa_map$y[6887]
+
+resolution <- 0.1
+```
+
+
+```{r}
+map("usa")
+points(map_grids)
+```
+
+```{r}
+data
+```
+
+```{r}
+interpolate_station_data <- function(){
+  return (unique(data[!data$state %in% c("ON", "SA", "HI", "AK"), c("station_name", "LONGITUDE", "LATITUDE")]) )
+}
+```
+
+```{r}
+interpolate_station_data()
+```
+
+
+```{r}
+plot_interpolations <- function(interpolations, usa_grids){
+  map("usa")
+  points(usa_grids)
+  points(interpolations$LONGITUDE, interpolations$LATITUDE, pch = "x", cex = 0.5)
+}
+```
+
+```{r}
+plot_interpolations(interpolate_station_data(), create_usa_grid(resolution = 1))
 ```
 

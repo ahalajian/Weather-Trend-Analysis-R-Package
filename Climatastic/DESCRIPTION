@@ -1,11 +1,18 @@
 Package: Climatastic
 Type: Package
-Title: What the Package Does (Title Case)
+Title: US Climate Reference Network package for R
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: c(person("Andrew", "Halajian", email = "ah697@cornell.edu", role = c("aut", "cre")), person("Caroline", "Sun", email = "cs979@cornell.edu", role = c("aut", "cre") ) )
+Description: Functions to conduct statistical analyses of the daily data from weather stations maintained by the National Centers for ENvironmental Information (NCEI), 
+\url{https: //www.ncei.noaa.gov/pub/data/uscrn/products/daily01/}. Retreive yearly trends and averages of temperature over time.
+License: GPL-2
 Encoding: UTF-8
 LazyData: true
+Imports: dplyr
+RoxygenNote: 7.3.1
+Suggests: 
+    rmarkdown,
+    knitr,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
