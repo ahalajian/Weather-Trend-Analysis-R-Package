@@ -34,21 +34,21 @@ extract_time_series(53878, "2010-01-01", "2019-02-02")
 
 ```{r}
 yearly_cycle <- function(station){
-  data$day <- format(data[["LST_DATE"]], "%j")
-  data |> filter(WBANNO == station) |> group_by(day) |> summarize(expected_avg_temp = mean(T_DAILY_AVG, na.rm = TRUE))
+  day <- as.integer(format(data[["LST_DATE"]], "%j"))
+  #data$day <- format(data[["LST_DATE"]], "%j")
+  result <- data |> dplyr::filter(WBANNO == station) |> dplyr::group_by(day = as.integer(format("LST_DATE", "%j"))) |> dplyr::summarize(expected_avg_temp = mean(T_DAILY_AVG, na.rm = TRUE))
+  return(as.data.frame(result))
 }
 
 ```
 #test case 1
 ```{r}
 yearly_cycle(53878)
-
 ```
 #function 3
 ```{r}
 trend_estimate <- function(){
   data$year <- as.numeric(format(data[["LST_DATE"]], "%y"))
-  #data |> filter(WBANNO == station) |> group_by(day) |> summarize(expected_avg_temp = mean(T_DAILY_AVG, na.rm = TRUE))
   model <- lm(T_DAILY_AVG ~ year, data = data)
   temp_trend <- coef(model)[2]
   return(temp_trend)
@@ -86,7 +86,9 @@ create_grid_pts <- function(resolution = 0.1) {
 
 
 ```{r}
-create_grid_pts()
+library("maps")
+library("sp")
+plot(create_grid_pts(res = 1))
 ```
 
 
