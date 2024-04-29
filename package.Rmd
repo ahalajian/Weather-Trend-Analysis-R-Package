@@ -65,30 +65,45 @@ library("sp")
 ```
 
 ```{r}
-create_grid_pts <- function(resolution = 0.1) {
-  # Load the map data for the contiguous USA
-  usa_map <- map("usa", plot = FALSE)
+create_grid_pts <- function(resolution = 1) {
 
-  # Extract the boundary coordinates of the contiguous USA
+  # get data about contiguous US boundary coordinates and ranges
+  usa_map <- maps::map("usa", plot = FALSE)
   usa_boundary <- usa_map$range
+
+  #generate longitude and latitude based on resolution within max and min
+  longitude <- seq(usa_boundary[1], usa_boundary[2], by = resolution)
+  latitude <- seq(usa_boundary[3], usa_boundary[4], by = resolution)
+  grid_points <- expand.grid(LONGITUDE = longitude, LATITUDE = latitude)
+
+  #determine which grid_points are actually in contiguous US
+  inside_usa <-
+    which(sp::point.in.polygon(
+    grid_points$LONGITUDE, grid_points$LATITUDE,
+    usa_map$x[1:6886], usa_map$y[1:6886]) == 1)
   
-  # Create a grid of points within the boundary
-  lon <- seq(usa_boundary[1], usa_boundary[2], by = resolution)
-  lat <- seq(usa_boundary[3], usa_boundary[4], by = resolution)
-  grid_points <- expand.grid(lon = lon, lat = lat)
- 
-  inside_usa <- which(point.in.polygon(grid_points$lon, grid_points$lat, usa_map$x[1:6886], usa_map$y[1:6886]) == 1)
-  
-  
+  inside_usa <- c()
+  start <- 1
+  na_vals <- which(is.na(usa_map$x))
+  for (na_val in na_vals) {
+    inside_island <- which(sp::point.in.polygon(
+      grid_points$LONGITUDE, grid_points$LATITUDE, 
+      usa_map$x[start:na_val - 1], usa_map$y[start:na_val - 1]) == 1)
+    
+    inside_usa <- c(inside_usa, inside_island)
+    start <- na_val + 1
+}
+
   return(grid_points[inside_usa, ])
+
 }
 ```
-
 
 ```{r}
 library("maps")
 library("sp")
-plot(create_grid_pts(res = 1))
+maps::map("usa")
+plot(create_grid_pts(resolution = 1))
 ```
 
 
