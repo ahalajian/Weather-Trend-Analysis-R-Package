@@ -11,7 +11,8 @@ LazyData: true
 Imports: 
     dplyr,
     maps,
-    sp
+    sp,
+    GpGp
 RoxygenNote: 7.3.1
 Suggests: 
     rmarkdown,

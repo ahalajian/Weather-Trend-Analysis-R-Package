@@ -18,5 +18,5 @@
 interpolate_station_data <- function(){
   #remove station data in Alaska, Hawaii, Ontario, and Sakha Republic
   #remove duplicate station longitude and latitude information
-  return (unique(data[!data$state %in% c("ON", "SA", "HI", "AK"), c("station_name", "LONGITUDE", "LATITUDE")]) )
+  return (unique(data[!data$state %in% c("ON", "SA", "HI", "AK"), c("WBANNO", "station_name", "LONGITUDE", "LATITUDE")]) )
 }

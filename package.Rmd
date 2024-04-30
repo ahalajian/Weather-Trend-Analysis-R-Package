@@ -110,7 +110,7 @@ plot(create_grid_pts(resolution = 1))
 
 ```{r}
 interpolate_station_data <- function(){
-  return (unique(data[!data$state %in% c("ON", "SA", "HI", "AK"), c("station_name", "LONGITUDE", "LATITUDE")]) )
+  return (unique(data[!data$state %in% c("ON", "SA", "HI", "AK"), c("WBANNO", "station_name", "LONGITUDE", "LATITUDE")]) )
 }
 ```
 
@@ -129,5 +129,113 @@ plot_interpolations <- function(interpolations, usa_grids){
 
 ```{r}
 plot_interpolations(interpolate_station_data(), create_usa_grid(resolution = 1))
+```
+
+
+```{r}
+#get all unique stations
+#call create_stations
+stations <- unique(interpolate_station_data()$WBANNO)
+
+
+interpolated_data <- interpolate_station_data()
+#df_mar24 <- matrix(data = NA, nrow = length(stations), ncol = 3)
+df_mar24 <- data.frame()
+avg_temp <- rep(NA, length(stations))
+n = 0
+for(station in stations){
+  n <- n + 1
+  time_series <- extract_time_series(station, start = "2024-03-01", end = "2024-03-31")
+  avg_temp[n] <- mean(time_series$T_DAILY_AVG, na.rm = TRUE)
+  df_mar24[n, 1] <- avg_temp[n]
+  df_mar24[n, 2] <- mean(time_series$P_DAILY_CALC, na.rm = TRUE) #precipitation
+}
+names(df_mar24) <- c("avg_temp", "precipitation")
+
+interpolated_avg <- na.omit(cbind(interpolated_data, avg_temp))
+interpolated_avg
+
+df_mar24 <- na.omit(cbind(interpolated_data, df_mar24))
+df_mar24
+
+
+```
+
+```{r}
+library("fields")
+map("usa")
+quilt.plot(interpolated_avg$LONGITUDE, interpolated_avg$LATITUDE, interpolated_avg$avg_temp, add = TRUE,
+           xlab = "Longitude", ylab = "Latitude", legend.lab = "Avg Temperature")
+```
+
+```{r}
+#gets elevation
+#install.packages("elevatr")
+library(elevatr)
+
+locations <- interpolated_avg[, c("LONGITUDE", "LATITUDE")]
+names(locations) <- c("x", "y")
+elevations <- get_elev_point(locations, prj = 4326)
+
+elevations$elevation[103] <- 1321
+#determined using https://www.dcode.fr/earth-elevation, get_elev_point did not find this elevation
+
+df_mar24$elevation <- elevations$elevation
+
+df_mar24
+```
+
+```{r}
+library("GpGp")
+X <- model.matrix(~ precipitation + elevation, data = df_mar24)
+
+locs <- df_mar24[, c("LONGITUDE", "LATITUDE")]
+spatial_model <- fit_model(y = df_mar24$avg_temp,
+                           locs = locs,
+                           X = X,
+                           covfun_name = "matern_sphere", 
+                           silent = TRUE)
+spatial_model
+
+#US has elevation of roughly 763m, according to ___
+
+
+
+
+```
+
+
+
+```{r}
+locs_pred = create_grid_pts()
+typical_weather_station <- data.frame(
+  Intercept = rep(1, nrow(locs_pred)),
+  precipitation = mean(df_mar24$precipitation),
+  elevation = 763
+  )
+typical_weather_station
+
+pred <- predictions(fit = spatial_model, locs_pred = locs_pred, X_pred = typical_weather_station)
+
+locs_pred
+
+long <- unique(locs_pred$LONGITUDE)
+lat <- unique(locs_pred$LATITUDE)
+
+library("fields")
+
+quilt.plot(locs_pred$LONGITUDE, locs_pred$LATITUDE, pred,
+           xlab = "Longitude", ylab = "Latitude", legend.lab = "Avg Temperature")
+
+pred_matrix <- matrix(pred, nrow = 2, ncol = 402, byrow = TRUE)
+
+image(long, lat, z = pred_matrix,
+      main = "Spatial Map of Predicted Values",
+      xlab = "Longitude", ylab = "Latitude"
+      )
+
+pred_matrix
+
+#return to square usa with 1311 grid points, predict something for every single one of those gridpoints, using the same predictors. then, point in polygon so that we only have the points that are in the united states. take those indices and then only use those ones for our
 ```
 
