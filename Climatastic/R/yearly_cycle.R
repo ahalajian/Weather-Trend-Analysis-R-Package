@@ -20,12 +20,23 @@ yearly_cycle <- function(station){
 
   #extract data for station
   station_ind_data <- daily_weather_data[daily_weather_data$WBANNO == station, ]
-  day <- format(station_ind_data$LST_DATE, "%j")
+  ind_data_cleaned <- station_ind_data[!is.na(station_ind_data$T_DAILY_AVG), ]
 
-  #obtain mean of T_DAILY_AVG by day
-  avg_temp <- tapply(station_ind_data$T_DAILY_AVG, day, mean, na.rm = TRUE)
+  day <- as.numeric(format(ind_data_cleaned$LST_DATE, "%j"))
 
-  df <- data.frame(day = as.numeric(names(avg_temp)), expected_avg_temp = avg_temp)
+  #use sine and cosine with revised period
+  sine_term <- sin(2*pi*day/365.25)
+  cos_term <- cos(2*pi*day/365.25)
+  model_trig <- lm(ind_data_cleaned$T_DAILY_AVG ~ sine_term + cos_term)
+
+  #obtain expected average temperature by predicting on the training data
+  pred <- predict(model_trig,
+                  newdata = data.frame(ind_data_cleaned$T_DAILY_AVG))
+  exp_avg_temp <- tapply(pred, day, mean)
+
+  df <- data.frame(day = as.numeric(names(exp_avg_temp)),
+                   expected_avg_temp = exp_avg_temp)
 
   return(df)
 }
+
