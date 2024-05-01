@@ -34,11 +34,18 @@ extract_time_series(53878, "2010-01-01", "2019-02-02")
 
 ```{r}
 yearly_cycle <- function(station){
-  day <- as.integer(format(data[["LST_DATE"]], "%j"))
-  #data$day <- format(data[["LST_DATE"]], "%j")
-  result <- data |> dplyr::filter(WBANNO == station) |> dplyr::group_by(day = as.integer(format("LST_DATE", "%j"))) |> dplyr::summarize(expected_avg_temp = mean(T_DAILY_AVG, na.rm = TRUE))
-  return(as.data.frame(result))
+
+  station_data <- data[data$WBANNO == station, ] #extract data for station
+  day <- format(station_data$LST_DATE, "%j")  #obtain day of each station data
+
+  #obtain mean of T_DAILY_AVG by day
+  avg_temp <- tapply(station_data$T_DAILY_AVG, day, mean, na.rm = TRUE)
+
+  df <- data.frame(day = as.numeric(names(avg_temp)), expected_avg_temp = avg_temp)
+
+  return(df)
 }
+
 
 ```
 #test case 1
@@ -237,5 +244,43 @@ image(long, lat, z = pred_matrix,
 pred_matrix
 
 #return to square usa with 1311 grid points, predict something for every single one of those gridpoints, using the same predictors. then, point in polygon so that we only have the points that are in the united states. take those indices and then only use those ones for our
+```
+
+```{r}
+
+
+lowest_highest <- matrix(NA, length(stations), 2)
+lowest_highest <- as.data.frame(lowest_highest)
+colnames(lowest_highest) <- c("lowest", "highest")
+
+for(i in 1:length(stations)){
+  station <- stations[i]
+  cycle <- yearly_cycle(station) #this gives us tibble of yearly cycle
+  min <- min(cycle$expected_avg_temp, na.rm = TRUE)
+  max <- max(cycle$expected_avg_temp, na.rm = TRUE)
+  lowest_day <- cycle[which(cycle$expected_avg_temp == min), 1]
+  highest_day <- cycle[which(cycle$expected_avg_temp == max), 1]
+ 
+  lowest_highest$lowest[i] <- lowest_day
+  lowest_highest$highest[i] <- highest_day
+
+}
+
+station_lh <- cbind(stations, lowest_highest)
+station_lh
+
+lowest_highest_combined <- cbind(interpolated_data, station_lh)
+lowest_highest_combined
+
+```
+```{r}
+quilt.plot(lowest_highest_combined$LONGITUDE, lowest_highest_combined$LATITUDE, lowest_highest_combined$lowest,
+           xlab = "Longitude", ylab = "Latitude", main = "Coldest Day of the Year")
+
+#make december 21 : day 1
+# subtract 355
+# add 365 to each day, subtract 355 then mod 365
+quilt.plot(lowest_highest_combined$LONGITUDE, lowest_highest_combined$LATITUDE, lowest_highest_combined$highest,
+           xlab = "Longitude", ylab = "Latitude", main = "Warmest Day of the Year")
 ```
 

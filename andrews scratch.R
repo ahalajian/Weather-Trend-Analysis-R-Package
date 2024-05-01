@@ -15,4 +15,10 @@ plot_interpolations(interpolations, create_grid_pts())
 devtools::document()
 #Rd files will not appear until we write Roxygen comments in R files
 
-#devtools::test()
+devtools::test()
+
+devtools::build()
+#
+
+devtools::check()
+#must pass all the checks

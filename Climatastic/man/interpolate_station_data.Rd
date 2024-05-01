@@ -9,6 +9,7 @@ interpolate_station_data()
 \value{
 a Dataframe containing the following columns
 \itemize{
+  \item \code{WBANNO} station WBAN number
   \item \code{station_name} name of the USCRN station
   \item \code{LONGITUDE} Station longitude
   \item \code{LATITUDE} Station latitude

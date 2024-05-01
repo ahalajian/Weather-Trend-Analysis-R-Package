@@ -10,3 +10,10 @@ trend_estimate <- function(){
   temp_trend <- coef(model)[2]
   return(temp_trend)
 }
+
+#obtain days since january 1, 2000, divide by 365.25
+#make coefficient like that
+#then, coefficient will be in right units
+
+#account for cosine and sine
+

@@ -1,19 +1,25 @@
-library("testthat")
+#Note that start and end dates were obtained manually from data themselves, if
+#we did not specify a start/end date
 
 test_that("time series extracted (1)", {
   station <- 53878
-  start <- "2010-01-01"
-  end <- "2019-02-02"
+  start <- as.Date("2010-01-01")
+  end <- as.Date("2019-02-02")
   time_series <- extract_time_series(station, start, end)
-  
+
+  #first date is consistent with start date
   expect_equal(
     time_series[1,2],
-    "2010-01-01"
+    as.Date("2010-01-01")
   )
+
+  #last date is consistent with end date
   expect_equal(
     time_series[nrow(time_series),2],
-    "2019-02-02"
+    as.Date("2019-02-02")
   )
+
+  #random row's WBANNO is consistent with specified station
   expect_equal(
     time_series[nrow(time_series)-21,1],
     53878
@@ -25,16 +31,22 @@ test_that("time series extracted (1)", {
 
 test_that("time series extracted (2)", {
   station <- 53024
+  #this station has start and end date that's not 1/1/2000 and 4/7/2024
   time_series <- extract_time_series(station)
-  
+
+  #first date is its expected first measurement date
   expect_equal(
     time_series[1,2],
-    "2011-06-24"
+    as.Date("2011-06-24")
   )
+
+  #last date is its expected last measurement date
   expect_equal(
     time_series[nrow(time_series),2],
-    "2014-06-01"
+    as.Date("2014-06-01")
   )
+
+  #random row's WBANNO is consistent with specified station
   expect_equal(
     time_series[nrow(time_series)-56,1],
     53024
@@ -42,19 +54,24 @@ test_that("time series extracted (2)", {
 }
 )
 
-
 test_that("time series extracted (3)", {
   station <- 54937
+  #has start date that's not 1/1/2000, but end date is 4/7/2024
   time_series <- extract_time_series(station)
-  
+
+  #first date is its expected first measurement date
   expect_equal(
     time_series[1,2],
-    "2008-07-29"
+    as.Date("2008-07-29")
   )
+
+  #last date is its expected last measurement date
   expect_equal(
     time_series[nrow(time_series),2],
-    "2024-04-07"
+    as.Date("2024-04-07")
   )
+
+  #random row's WBANNO is consistent with specified station
   expect_equal(
     time_series[nrow(time_series)-1654,1],
     54937
@@ -63,21 +80,30 @@ test_that("time series extracted (3)", {
 )
 
 test_that("time series extracted (4)", {
-  station <- 4141
-  start <- "2020-02-02"
+  station <- 4141 #specified start date, but did not specify end date
+  start <- as.Date("2020-02-02")
   time_series <- extract_time_series(station, start)
-  
+
+  #first date is its expected first measurement date
   expect_equal(
     time_series[1,2],
-    "2020-02-02"
+    as.Date("2020-02-02")
   )
+
+  #last date is its expected last measurement date
   expect_equal(
     time_series[nrow(time_series),2],
-    "2024-04-07"
+    as.Date("2024-04-07")
+  )
+
+  #testing that all WBANNO's are correct and the same
+  expect_equal(
+    time_series[nrow(time_series)-99,1],
+    4141
   )
   expect_equal(
-    time_series[nrow(time_series)-500,1],
-    4141
+    all(time_series$WBANNO == time_series$WBANNO[1]),
+    TRUE
   )
 }
 )
@@ -85,16 +111,19 @@ test_that("time series extracted (4)", {
 
 test_that("time series extracted (5)", {
   station <- 94088
-  end <- "2020-02-02"
-  time_series <- extract_time_series(station, end)
-  
+  end <- as.Date("2020-02-02")
+  time_series <- extract_time_series(station, end = end)
+
+  #first date is its expected first measurement date
   expect_equal(
     time_series[1,2],
-    "2007-08-22"
+    as.Date("2007-08-22")
   )
+
+  #last date is its expected last measurement date
   expect_equal(
     time_series[nrow(time_series),2],
-    "2020-02-02"
+    as.Date("2020-02-02")
   )
   expect_equal(
     time_series[nrow(time_series)-178,1],
@@ -102,3 +131,24 @@ test_that("time series extracted (5)", {
   )
 }
 )
+
+test_that("time series extracted (6)", {
+  station <- 53877
+  time_series <- extract_time_series(station)
+
+  #first date and end date is its expected first measurement date
+  expect_equal(
+    c(time_series[1,2],time_series[nrow(time_series),2]),
+    c(as.Date("2000-11-14"), as.Date("2024-04-07"))
+  )
+
+
+  expect_equal(
+    c(time_series[nrow(time_series)-99,1], all(time_series$WBANNO == time_series$WBANNO[1]) ),
+    c(53877, TRUE)
+    )
+
+}
+
+)
+
