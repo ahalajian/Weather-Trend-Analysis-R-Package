@@ -5,15 +5,24 @@
 #'
 #' @export
 trend_estimate <- function(){
-  data$year <- as.numeric(format(data[["LST_DATE"]], "%y"))
-  model <- lm(T_DAILY_AVG ~ year, data = data)
-  temp_trend <- coef(model)[2]
-  return(temp_trend)
+  num_years_since <-
+    as.numeric(daily_weather_data[["LST_DATE"]] - as.Date("2000-01-01")) / 365.25
+  model <- lm(daily_weather_data$T_DAILY_AVG ~ num_years_since)
+  return(coef(model)[2])
 }
 
 #obtain days since january 1, 2000, divide by 365.25
-#make coefficient like that
-#then, coefficient will be in right units
+#num_years_since <-
+#  as.numeric(daily_weather_data[["LST_DATE"]] - as.Date("2000-01-01")) / 365.25
+#model <- lm(daily_weather_data$T_DAILY_AVG ~ num_years_since)
+#summary(model)
+
+#theta <- 2 * pi * num_years_since
+#sine_term <- sin(theta)
+#cosine_term <- cos(theta)
+
+#model <- lm(T_DAILY_AVG ~ sine_term + cosine_term, data = daily_weather_data)
+#summary(model)
 
 #account for cosine and sine
 

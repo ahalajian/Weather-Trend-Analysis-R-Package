@@ -53,7 +53,7 @@ row.names(station_data) <- NULL
 daily_weather_data$LST_DATE <-
   as.Date(as.character(daily_weather_data[["LST_DATE"]]), format = "%Y%m%d")
 daily_weather_data <-
-  replace(daily_weather_data, daily_weather_data == -9999 | data == -99, NA)
+  replace(daily_weather_data, daily_weather_data == -9999 | daily_weather_data == -99, NA)
 
 #save data as RData file
 save(station_data, file = "station_data.RData")

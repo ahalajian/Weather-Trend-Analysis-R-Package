@@ -18,11 +18,12 @@
 #' @export
 yearly_cycle <- function(station){
 
-  station_data <- data[data$WBANNO == station, ] #extract data for station
-  day <- format(station_data$LST_DATE, "%j")  #obtain day of each station data
+  #extract data for station
+  station_ind_data <- daily_weather_data[daily_weather_data$WBANNO == station, ]
+  day <- format(station_ind_data$LST_DATE, "%j")
 
   #obtain mean of T_DAILY_AVG by day
-  avg_temp <- tapply(station_data$T_DAILY_AVG, day, mean, na.rm = TRUE)
+  avg_temp <- tapply(station_ind_data$T_DAILY_AVG, day, mean, na.rm = TRUE)
 
   df <- data.frame(day = as.numeric(names(avg_temp)), expected_avg_temp = avg_temp)
 

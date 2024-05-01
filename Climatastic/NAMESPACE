@@ -2,7 +2,7 @@
 
 export(create_grid_pts)
 export(extract_time_series)
-export(interpolate_station_data)
+export(interpolate_grid_pts)
 export(plot_interpolations)
 export(trend_estimate)
 export(yearly_cycle)
