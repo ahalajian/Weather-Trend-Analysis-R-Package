@@ -27,10 +27,10 @@ yearly_cycle <- function(station){
   #use sine and cosine with revised period
   sine_term <- sin(2*pi*day/365.25)
   cos_term <- cos(2*pi*day/365.25)
-  model_trig <- lm(ind_data_cleaned$T_DAILY_AVG ~ sine_term + cos_term)
+  model_trig <- stats::lm(ind_data_cleaned$T_DAILY_AVG ~ sine_term + cos_term)
 
   #obtain expected average temperature by predicting on the training data
-  pred <- predict(model_trig,
+  pred <- stats::predict(model_trig,
                   newdata = data.frame(ind_data_cleaned$T_DAILY_AVG))
   exp_avg_temp <- tapply(pred, day, mean)
 

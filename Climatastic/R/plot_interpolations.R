@@ -4,7 +4,7 @@
 #' contiguous border of the USA, and its grid points.
 #'
 #' @param interpolations a "Dataframe" object returned from
-#' \code{\link{interpolate_station_data}}, containing columns \code{LONGITUDE}
+#' \code{\link{interpolate_grid_pts}}, containing columns \code{LONGITUDE}
 #' and \code{LATITUDE}.
 #' @param grid_pts a "Dataframe" object returned from
 #' \code{\link{create_grid_pts}}, containing columns \code{LONGITUDE}
@@ -18,6 +18,7 @@
 #' @export
 plot_interpolations <- function(interpolations, grid_pts){
   maps::map("usa")
-  points(grid_pts, pch = 19, cex = 0.5)
-  points(interpolations$LONGITUDE, interpolations$LATITUDE, pch = 4, col = "red", cex = 1)
+
+  #graphics::points(grid_pts, pch = 19, cex = 0.5)
+  #graphics::points(interpolations$LONGITUDE, interpolations$LATITUDE, pch = 4, col = "red", cex = 1)
 }

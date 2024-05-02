@@ -7,9 +7,12 @@
 trend_estimate <- function(){
   num_years_since <-
     as.numeric(daily_weather_data[["LST_DATE"]] - as.Date("2000-01-01")) / 365.25
-  model <- lm(daily_weather_data$T_DAILY_AVG ~ num_years_since)
-  return(coef(model)[2])
+  model <- stats::lm(daily_weather_data$T_DAILY_AVG ~ num_years_since)
+  return(stats::coef(model)[2])
 }
+
+#for a single station
+#should involve cosine and sine again
 
 #obtain days since january 1, 2000, divide by 365.25
 #num_years_since <-

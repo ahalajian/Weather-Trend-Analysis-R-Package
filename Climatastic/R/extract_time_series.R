@@ -20,7 +20,7 @@
 extract_time_series <- function(station, start = as.Date("2000-11-14"), end = as.Date("2024-04-08")){
 
   this_station <- daily_weather_data |>
-    dplyr::filter(WBANNO == station & start <= LST_DATE & end >= LST_DATE)
+    dplyr::filter(.data$WBANNO == station & start <= .data$LST_DATE & end >= .data$LST_DATE)
 
   return(this_station)
 }

@@ -8,7 +8,7 @@ plot_interpolations(interpolations, grid_pts)
 }
 \arguments{
 \item{interpolations}{a "Dataframe" object returned from
-\code{\link{interpolate_station_data}}, containing columns \code{LONGITUDE}
+\code{\link{interpolate_grid_pts}}, containing columns \code{LONGITUDE}
 and \code{LATITUDE}.}
 
 \item{grid_pts}{a "Dataframe" object returned from

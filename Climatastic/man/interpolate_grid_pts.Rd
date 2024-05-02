@@ -6,22 +6,40 @@
 \usage{
 interpolate_grid_pts(station_weather_data, grid_pts)
 }
-\value{
-a Dataframe containing the following columns
+\arguments{
+\item{station_weather_data}{a "data.frame" object containing the following two
+columns
 \itemize{
-  \item \code{WBANNO} station WBAN number
-  \item \code{station_name} name of the USCRN station
-  \item \code{LONGITUDE} Station longitude
-  \item \code{LATITUDE} Station latitude
+  \item \code{LONGITUDE} station longitudes
+  \item \code{LATITUDE} station latitudes
+  Additionally, there must be a third column, which is the data the we
+  interpolate from the stations to the grid points. Please note that the
+  non-longitude and non-latitude column must be last among all columns.
+}}
+
+\item{grid_pts}{a "data.frame" object returned from
+\code{\link{create_grid_pts}}, containing columns \code{LONGITUDE}
+and \code{LATITUDE}.}
+}
+\value{
+a dataframe containing the following columns
+\itemize{
+  \item \code{LONGITUDE} grid point longitudes from \code{grid_pts$LONGITUDE}
+  \item \code{LATITUDE} grid point latitudes from \code{grid_pts$LATITUDE}
+  \item \code{predictions} interpolated grid point longitudes and latitudes
+  for \code{station_weather_data[,3]}
 }
 }
 \description{
-This function interpolates all the stations to grid points by returning the
+This function interpolates (predicts) all the stations to grid points by returning the
 stations that are within the contiguous USA.
 }
 \examples{
-# Get yearly cycle for station NC_Asheville_8_SSW
-interpolations <- interpolate_station_data()
-plot(interpolations$LONGITUDE, interpolations$LATITUDE)
-plot_interpolations(interpolations, create_grid_pts())
+# Interpolate T_DAILY_AVG from stations to grid points
+grid_pts <- create_grid_pts()
+station_locs <- station_data[, c("LONGITUDE", "LATITUDE")]
+avg_T_DAILY_AVG <- tapply(daily_weather_data$T_DAILY_AVG,
+daily_weather_data$station_name, mean, na.rm = TRUE)
+station_weather_data <- cbind(station_locs, avg_T_DAILY_AVG)
+interpolations <- interpolate_grid_pts(station_weather_data, grid_pts)
 }
