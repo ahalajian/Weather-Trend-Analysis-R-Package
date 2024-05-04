@@ -4,22 +4,35 @@
 \alias{interpolate_grid_pts}
 \title{Interpolate data from the stations to grid points within the contiguous USA}
 \usage{
-interpolate_grid_pts(station_weather_data, grid_pts)
+interpolate_grid_pts(
+  station_locs,
+  station_covariates = NULL,
+  interpolation_data,
+  grid_pts,
+  grid_covariates = NULL
+)
 }
 \arguments{
-\item{station_weather_data}{a "data.frame" object containing the following two
+\item{station_locs}{a "data.frame" object containing the following two
 columns
 \itemize{
   \item \code{LONGITUDE} station longitudes
   \item \code{LATITUDE} station latitudes
-  Additionally, there must be a third column, which is the data the we
-  interpolate from the stations to the grid points. Please note that the
-  non-longitude and non-latitude column must be last among all columns.
 }}
+
+\item{station_covariates}{a "data.frame" object containing any covariate
+data to include in the spatial model. If not provided, station longitudes
+and latitudes would be used instead.}
+
+\item{interpolation_data}{a vector containing the data to interpolate.}
 
 \item{grid_pts}{a "data.frame" object returned from
 \code{\link{create_grid_pts}}, containing columns \code{LONGITUDE}
 and \code{LATITUDE}.}
+
+\item{grid_covariates}{a "data.frame" object containing any covariate data to
+include in the spatial model. If not provided, grid longitudes and
+latitudes would be used instead.}
 }
 \value{
 a dataframe containing the following columns
@@ -29,17 +42,24 @@ a dataframe containing the following columns
   \item \code{predictions} interpolated grid point longitudes and latitudes
   for \code{station_weather_data[,3]}
 }
+
+Note that if either \code{station_covariates} or \code{grid_covariates} are left empty,
+then they will both be replaced with their respective longitudes and
+latitudes.
+
+Additionally, note that all arguments provided must respect the dimensions
+of all other arguments.
 }
 \description{
-This function interpolates (predicts) all the stations to grid points by returning the
-stations that are within the contiguous USA.
+This function interpolates (predicts) all the station data to grid points by
+fitting a spatial model to the provided data.
 }
 \examples{
 # Interpolate T_DAILY_AVG from stations to grid points
 grid_pts <- create_grid_pts()
 station_locs <- station_data[, c("LONGITUDE", "LATITUDE")]
-avg_T_DAILY_AVG <- tapply(daily_weather_data$T_DAILY_AVG,
+interpolation_data <- tapply(daily_weather_data$T_DAILY_AVG,
 daily_weather_data$station_name, mean, na.rm = TRUE)
-station_weather_data <- cbind(station_locs, avg_T_DAILY_AVG)
-interpolations <- interpolate_grid_pts(station_weather_data, grid_pts)
+interpolations <- interpolate_grid_pts(station_locs,
+interpolation_data = interpolation_data, grid_pts = grid_pts[,c(1,2)])
 }

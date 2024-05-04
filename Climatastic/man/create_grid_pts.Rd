@@ -14,10 +14,13 @@ latitude grid points}
 a data-frame with the longitudes and latitudes of grid points within
 contiguous USA based on specified resolution.
 
-a Dataframe containing the following columns
+a Dataframe containing the following columns, where a row
+represents a grid point:
 \itemize{
-  \item \code{LONGITUDE} longitude of grid points within contiguous USA
-  \item \code{LATITUDE} latitude of grid points within contiguous USA
+  \item \code{LONGITUDE} longitude of grid points
+  \item \code{LATITUDE} latitude of grid points
+  \item \code{inside_usa} boolean vector for whether the grid point is
+  inside the contiguous USA
 }
 }
 \description{
@@ -26,6 +29,6 @@ of grid points within the contiguous USA based on the resolution specified.
 }
 \examples{
 # create grid points with high resolution
-grid_pts <- create_grid_pts(0.1)
-plot(grid_pts)
+grid_pts <- create_grid_pts(1)
+plot(grid_pts[,c(1,2)][grid_pts$inside_usa,])
 }

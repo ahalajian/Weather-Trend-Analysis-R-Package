@@ -4,10 +4,10 @@
 \alias{yearly_cycle}
 \title{Estimate the yearly cycle for one station}
 \usage{
-yearly_cycle(station)
+yearly_cycle(station_daily_data)
 }
 \arguments{
-\item{station}{USCRN station WBAN number id}
+\item{station_daily_data}{daily weather data for a specific USCRN station id}
 }
 \value{
 a Dataframe containing the following columns:
@@ -17,13 +17,14 @@ a Dataframe containing the following columns:
 }
 }
 \description{
-This function calculates a station's yearly cycle, which is simply the
-expected temperature on each day of the year. Returns a dataframe
-containing expected average temperature of each day of the year.
+This function estimates a station's yearly cycle, which is simply the
+expected temperature on each day of the year. The estimation occurs by using
+sine and cosine terms in the model to predict expected temperature. Returns
+a dataframe containing expected average temperature of each day of the year.
 }
 \examples{
 # Get yearly cycle for station NC_Asheville_8_SSW
 station_id <- 53877
-forecast <- yearly_cycle(station_id)
-print(forecast)
+station_daily_data <- daily_weather_data[daily_weather_data$WBANNO == station_id, ]
+yearly_cycle(station_daily_data)
 }

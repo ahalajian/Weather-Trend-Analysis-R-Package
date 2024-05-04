@@ -4,9 +4,23 @@
 \alias{trend_estimate}
 \title{Estimate the trend of temperatures over time}
 \usage{
-trend_estimate()
+trend_estimate(station_daily_data)
+}
+\arguments{
+\item{station_daily_data}{daily weather data for a specific USCRN station id}
+}
+\value{
+a vector containing the coefficient/trend estimate, and the standard
+error of the coefficient.
 }
 \description{
-This function calculates the trend of temperatures over time, in units of degrees Celsius per year. Returns a dataframe
+This function calculates the trend of temperatures over time, in units of
+degrees Celsius per year. Returns a dataframe
 containing expected average temperature of each day of the year.
+}
+\examples{
+# Get trend estimate for station NC_Asheville_8_SSW
+station_id <- 53877
+station_daily_data <- daily_weather_data[daily_weather_data$WBANNO == station_id, ]
+trend_estimate(station_daily_data)
 }

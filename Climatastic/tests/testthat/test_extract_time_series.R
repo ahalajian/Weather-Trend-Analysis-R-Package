@@ -3,9 +3,10 @@
 
 test_that("time series extracted (1)", {
   station <- 53878
+  station_daily_data <- daily_weather_data[daily_weather_data$WBANNO == station, ]
   start <- as.Date("2010-01-01")
   end <- as.Date("2019-02-02")
-  time_series <- extract_time_series(station, start, end)
+  time_series <- extract_time_series(station_daily_data, start, end)
 
   #first date is consistent with start date
   expect_equal(
@@ -31,8 +32,9 @@ test_that("time series extracted (1)", {
 
 test_that("time series extracted (2)", {
   station <- 53024
+  station_daily_data <- daily_weather_data[daily_weather_data$WBANNO == station, ]
   #this station has start and end date that's not 1/1/2000 and 4/7/2024
-  time_series <- extract_time_series(station)
+  time_series <- extract_time_series(station_daily_data)
 
   #first date is its expected first measurement date
   expect_equal(
@@ -56,8 +58,9 @@ test_that("time series extracted (2)", {
 
 test_that("time series extracted (3)", {
   station <- 54937
+  station_daily_data <- daily_weather_data[daily_weather_data$WBANNO == station, ]
   #has start date that's not 1/1/2000, but end date is 4/7/2024
-  time_series <- extract_time_series(station)
+  time_series <- extract_time_series(station_daily_data)
 
   #first date is its expected first measurement date
   expect_equal(
@@ -81,8 +84,9 @@ test_that("time series extracted (3)", {
 
 test_that("time series extracted (4)", {
   station <- 4141 #specified start date, but did not specify end date
+  station_daily_data <- daily_weather_data[daily_weather_data$WBANNO == station, ]
   start <- as.Date("2020-02-02")
-  time_series <- extract_time_series(station, start)
+  time_series <- extract_time_series(station_daily_data, start)
 
   #first date is its expected first measurement date
   expect_equal(
@@ -111,8 +115,9 @@ test_that("time series extracted (4)", {
 
 test_that("time series extracted (5)", {
   station <- 94088
+  station_daily_data <- daily_weather_data[daily_weather_data$WBANNO == station, ]
   end <- as.Date("2020-02-02")
-  time_series <- extract_time_series(station, end = end)
+  time_series <- extract_time_series(station_daily_data, end = end)
 
   #first date is its expected first measurement date
   expect_equal(
@@ -134,7 +139,8 @@ test_that("time series extracted (5)", {
 
 test_that("time series extracted (6)", {
   station <- 53877
-  time_series <- extract_time_series(station)
+  station_daily_data <- daily_weather_data[daily_weather_data$WBANNO == station, ]
+  time_series <- extract_time_series(station_daily_data)
 
   #first date and end date is its expected first measurement date
   expect_equal(

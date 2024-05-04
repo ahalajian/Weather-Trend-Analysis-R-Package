@@ -1,10 +1,11 @@
 #' Estimate the yearly cycle for one station
 #'
-#' This function calculates a station's yearly cycle, which is simply the
-#' expected temperature on each day of the year. Returns a dataframe
-#' containing expected average temperature of each day of the year.
+#' This function estimates a station's yearly cycle, which is simply the
+#' expected temperature on each day of the year. The estimation occurs by using
+#' sine and cosine terms in the model to predict expected temperature. Returns
+#' a dataframe containing expected average temperature of each day of the year.
 #'
-#' @param station USCRN station WBAN number id
+#' @param station_daily_data daily weather data for a specific USCRN station id
 #' @return a Dataframe containing the following columns:
 #' \itemize{
 #'   \item day: day number (1-366)
@@ -13,14 +14,14 @@
 #' @examples
 #' # Get yearly cycle for station NC_Asheville_8_SSW
 #' station_id <- 53877
-#' forecast <- yearly_cycle(station_id)
-#' print(forecast)
+#' station_daily_data <- daily_weather_data[daily_weather_data$WBANNO == station_id, ]
+#' yearly_cycle(station_daily_data)
 #' @export
-yearly_cycle <- function(station){
+yearly_cycle <- function(station_daily_data){
 
   #extract data for station
-  station_ind_data <- daily_weather_data[daily_weather_data$WBANNO == station, ]
-  ind_data_cleaned <- station_ind_data[!is.na(station_ind_data$T_DAILY_AVG), ]
+  #station_ind_data <- daily_weather_data[daily_weather_data$WBANNO == station, ]
+  ind_data_cleaned <- station_daily_data[!is.na(station_daily_data$T_DAILY_AVG), ]
 
   day <- as.numeric(format(ind_data_cleaned$LST_DATE, "%j"))
 

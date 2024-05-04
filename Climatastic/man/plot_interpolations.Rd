@@ -12,16 +12,15 @@ plot_interpolations(interpolations, grid_pts)
 and \code{LATITUDE}.}
 
 \item{grid_pts}{a "Dataframe" object returned from
-\code{\link{create_grid_pts}}, containing columns \code{LONGITUDE}
-and \code{LATITUDE}.}
+\code{\link{create_grid_pts}}, containing columns \code{LONGITUDE},
+\code{LATITUDE}, and \code{inside_usa}.}
 }
 \description{
 This function plots all the gridded interpolations on a map, along with the
 contiguous border of the USA, and its grid points.
 }
 \examples{
-# Plot gridded interpolations
-interpolations <- interpolate_station_data()
 grid_pts <- create_grid_pts()
+interpolations <- cbind(grid_pts[,c(1,2)], predictions = rep(1:16, length.out = nrow(grid_pts)))
 plot_interpolations(interpolations, grid_pts)
 }
