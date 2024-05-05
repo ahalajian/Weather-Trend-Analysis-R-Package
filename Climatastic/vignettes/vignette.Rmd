@@ -3,8 +3,11 @@ title: "vignette"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{vignette}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r, include = FALSE}
@@ -17,3 +20,103 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(Climatastic)
 ```
+
+*1. Make a map of the average temperature at each station for the month
+of March 2024.*
+
+
+```{r}
+data("station_data")
+data("daily_weather_data")
+
+stations <- station_data$station_name
+
+mar24_temp_avgs <- rep(NA, length(stations))
+i = 1
+start = as.Date("2024-03-01")
+end = as.Date("2024-03-31")
+
+for(station_name in stations){
+  station_weather <- 
+    daily_weather_data[daily_weather_data["station_name"] == station_name, ]
+  time_series <- extract_time_series(station_weather, start, end)
+  mar24_temp_avgs[i] <- mean(time_series$T_DAILY_AVG, na.rm = TRUE)
+  i <- i + 1
+}
+
+#some stations do not have data in 2024 or have NA's for all of March '24
+df_mar24 <- na.omit(cbind(station_data, mar24_temp_avgs))
+names(df_mar24)[6] <- "temp_avg"
+df_mar24
+
+df_mar24$LONGITUDE <- as.numeric(df_mar24$LONGITUDE)
+df_mar24$LATITUDE <- as.numeric(df_mar24$LATITUDE)
+
+maps::map("usa")
+fields::quilt.plot(df_mar24$LONGITUDE, df_mar24$LATITUDE, df_mar24$temp_avg, add = TRUE, xlab = "Longitude", ylab = "Latitude", legend.lab = "Avg Temperature")
+#try to make the squares smaller if we have time
+```
+
+
+2.  *Fit a spatial model and plot an interpolated map of average
+    temperatures for March 2024. Consider including elevation in your
+    model.*
+    
+```{r}
+grid_pts <- create_grid_pts()
+
+#get elevation data
+library(elevatr)
+
+#first for station data for march 24
+mar24_locations <- df_mar24[,c("LONGITUDE", "LATITUDE")]
+names(mar24_locations) <- c("x", "y")
+mar24_elevations <- get_elev_point(mar24_locations, prj = 4326, src = "aws")
+
+station_covariates <- cbind(mar24_locations, mar24_elevations$elevation)
+
+#now for all grid_pts - Problem: grid points have 335 NA's
+grid_locations <- grid_pts[,c("LONGITUDE", "LATITUDE")]
+names(grid_locations) <- c("x", "y")
+grid_elevations <- get_elev_point(grid_locations, prj = 4326, src = "aws")
+
+grid_covariates <- cbind(grid_locations, grid_elevations$elevation)
+
+```
+
+    
+```{r}
+interpolations <- interpolate_grid_pts(
+  station_locs = df_mar24[,c("LONGITUDE", "LATITUDE")],
+  station_covariates = station_covariates,
+  interpolation_data = df_mar24[["temp_avg"]], 
+  grid_pts = grid_pts[,c(1,2)],
+  grid_covariates = grid_covariates)
+
+plot_interpolations(interpolations, grid_pts)
+```
+    
+3.  *Estimate the warmest and coldest day of the year for each station,
+    and plot those days on two maps. Think carefully about how to
+    represent the days numerically. In your report, describe the
+    statistical analysis that you used for estimating the warmest and
+    coldest days at each station, including writing down any statistical
+    models in mathematical notation. Be sure to define all your symbols
+    and assumptions. 2 Interpolate maps of the warmest and coldest days,
+    and plot the interpolated maps of warmest and coldest days.*
+4.  *Make a single plot of the estimated yearly cycles for 10 different
+    stations, highlighting a diversity of climates around the contiguous
+    USA. Your plot should clearly indicate which cycle is from which
+    station.*
+5.  *Estimate the trend over the years for each station, in units of
+    degrees Fahrenheit per year, and plot the trend values on a map.
+    Indicate visually on your map which of the trends are statistically
+    significant. In your report, write the statistical model that you
+    used in mathematical notation. Be sure to define all your symbols
+    and assumptions. Interpolate the estimated trends to a grid, and
+    plot them on a map. For the interpolations, you may consider using
+    only the trend estimates whose standard errors are sufficiently
+    small.*
+6.  *Find a reputable source for the average temperature trend in the
+    contiguous USA over the past 20 years, and compare your results to
+    the source’s.*
