@@ -5,7 +5,7 @@
 \alias{station_data}
 \title{Station Data for all USCRN Stations}
 \format{
-a dataframe with 237 rows and 5 columns
+a dataframe with 236 rows and 5 columns
 \describe{
     \item{WBANNO}{station WBAN number}
     \item{station_name}{name of the USCRN station}

@@ -10,8 +10,8 @@ trend_estimate(station_daily_data)
 \item{station_daily_data}{daily weather data for a specific USCRN station id}
 }
 \value{
-a vector containing the coefficient/trend estimate, and the standard
-error of the coefficient.
+a vector containing the coefficient/trend estimate, the standard
+error of the coefficient, and the p-value of the coefficient.
 }
 \description{
 This function calculates the trend of temperatures over time, in units of

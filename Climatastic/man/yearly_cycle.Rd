@@ -12,7 +12,7 @@ yearly_cycle(station_daily_data)
 \value{
 a Dataframe containing the following columns:
 \itemize{
-  \item day: day number (1-366)
+  \item day: day number (1-365)
   \item expected_avg_temp: expected average temperature on each day
 }
 }
@@ -21,6 +21,9 @@ This function estimates a station's yearly cycle, which is simply the
 expected temperature on each day of the year. The estimation occurs by using
 sine and cosine terms in the model to predict expected temperature. Returns
 a dataframe containing expected average temperature of each day of the year.
+}
+\details{
+Note that this function removes all instances of leap days from the function.
 }
 \examples{
 # Get yearly cycle for station NC_Asheville_8_SSW

@@ -5,11 +5,11 @@ test_that("test trend estimate (1)", {
 
   #checking that output has both coefficient and standard error
   expect_equal(
-    length(trend), 2
+    length(trend), 3
   )
 
   expect_equal(
-    names(trend), c("Coefficient", "Standard Error")
+    names(trend), c("Coefficient", "Standard Error", "P-value")
   )
 
   #type check
@@ -26,11 +26,11 @@ test_that("test trend estimate (2)", {
 
   #checking that output has both coefficient and standard error
   expect_equal(
-    length(trend), 2
+    length(trend), 3
   )
 
   expect_equal(
-    names(trend), c("Coefficient", "Standard Error")
+    names(trend), c("Coefficient", "Standard Error", "P-value")
   )
 
   #type check

@@ -9,13 +9,16 @@
 #' @param grid_pts a "Dataframe" object returned from
 #' \code{\link{create_grid_pts}}, containing columns \code{LONGITUDE},
 #' \code{LATITUDE}, and \code{inside_usa}.
+#' @param ... further graphical parameters from \link{par} to appear in the
+#' output graph. Note that the x-axis and y-axis titles cannot be modified.
+#' They will always be Longitude and Latitude respectively.
 #' @return NULL
 #' @examples
 #' grid_pts <- create_grid_pts()
 #' interpolations <- cbind(grid_pts[,c(1,2)], predictions = rep(1:16, length.out = nrow(grid_pts)))
 #' plot_interpolations(interpolations, grid_pts)
 #' @export
-plot_interpolations <- function(interpolations, grid_pts){
+plot_interpolations <- function(interpolations, grid_pts, ...){
 
   #computations for matrix and plot creation
   unique_longitude <- unique(grid_pts$LONGITUDE)
@@ -31,6 +34,5 @@ plot_interpolations <- function(interpolations, grid_pts){
   pred_matrix <- matrix(predictions, lon_length, lat_length)
 
   fields::image.plot(unique_longitude, unique_latitude, pred_matrix,
-                     main = "Plotted Gridded Interpolations",
-                     xlab = "Longitude", ylab = "Latitude")
+                     xlab = "Longitude", ylab = "Latitude", ... )
 }

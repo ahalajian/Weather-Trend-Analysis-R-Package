@@ -48,13 +48,28 @@ colnames(station_data) <- c("WBANNO", "station_name", "state", "LONGITUDE", "LAT
 station_data <- unique(station_data) #since stations have multiple files for multiple years
 row.names(station_data) <- NULL
 
+station_data <- station_data[station_data$station_name != "AK_Huslia_27_W",]
+# Note: in our station_data, we make a new column for each unique station name.
+# There are two stations that have the same id, AK_Huslia_27_E, and
+# AK_Huslia_27_W. Station AK_Huslia_27_W only has one total
+# observation on August 31, 2023, with NA's for all the values, so we thus
+# remove it to not impact future analyses where we would double count values of
+# AK_Huslia_27_E twice, as they share same station id
+
 
 #cleaning data - formatting date and replacing missing with NA
 daily_weather_data$LST_DATE <-
   as.Date(as.character(daily_weather_data[["LST_DATE"]]), format = "%Y%m%d")
 daily_weather_data <-
   replace(daily_weather_data, daily_weather_data == -9999 | daily_weather_data == -99, NA)
+daily_weather_data <- daily_weather_data[daily_weather_data$station_name != "AK_Huslia_27_W",]
 
 #save data as RData file
 save(station_data, file = "station_data.RData")
 save(daily_weather_data, file = "daily_weather_data.RData")
+
+# Note: in our station_data, we make a new column for each unique station name.
+# There are two stations that have the same id, AK_Huslia_27_E, and
+# AK_Huslia_27_W. We include them as two separate observations, but ultimately
+# it shouldn't impact future analyses because AK_Huslia_27_W only has one total
+# observation on August 31, 2023, with NA's for all the values.

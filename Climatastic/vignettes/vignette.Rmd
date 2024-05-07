@@ -19,16 +19,14 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(Climatastic)
+data("station_data")
+data("daily_weather_data")
 ```
 
 *1. Make a map of the average temperature at each station for the month
 of March 2024.*
 
-
 ```{r}
-data("station_data")
-data("daily_weather_data")
-
 stations <- station_data$station_name
 
 mar24_temp_avgs <- rep(NA, length(stations))
@@ -47,26 +45,21 @@ for(station_name in stations){
 #some stations do not have data in 2024 or have NA's for all of March '24
 df_mar24 <- na.omit(cbind(station_data, mar24_temp_avgs))
 names(df_mar24)[6] <- "temp_avg"
-df_mar24
 
 df_mar24$LONGITUDE <- as.numeric(df_mar24$LONGITUDE)
 df_mar24$LATITUDE <- as.numeric(df_mar24$LATITUDE)
 
-maps::map("usa")
-fields::quilt.plot(df_mar24$LONGITUDE, df_mar24$LATITUDE, df_mar24$temp_avg, add = TRUE, xlab = "Longitude", ylab = "Latitude", legend.lab = "Avg Temperature")
-#try to make the squares smaller if we have time
+fields::bubblePlot(df_mar24$LONGITUDE, df_mar24$LATITUDE, df_mar24$temp_avg, col = fields::tim.colors(64), xlab = "Longitude", ylab = "Latitude", legend.lab = "Avg Temperature (Celsius)", main = "Average Temperature at Each Station for March 2024")
 ```
-
 
 2.  *Fit a spatial model and plot an interpolated map of average
     temperatures for March 2024. Consider including elevation in your
     model.*
-    
+
 ```{r}
 grid_pts <- create_grid_pts()
 
-#get elevation data
-library(elevatr)
+library(elevatr) #get elevation data
 
 #first for station data for march 24
 mar24_locations <- df_mar24[,c("LONGITUDE", "LATITUDE")]
@@ -84,7 +77,6 @@ grid_covariates <- cbind(grid_locations, grid_elevations$elevation)
 
 ```
 
-    
 ```{r}
 interpolations <- interpolate_grid_pts(
   station_locs = df_mar24[,c("LONGITUDE", "LATITUDE")],
@@ -93,30 +85,203 @@ interpolations <- interpolate_grid_pts(
   grid_pts = grid_pts[,c(1,2)],
   grid_covariates = grid_covariates)
 
-plot_interpolations(interpolations, grid_pts)
+plot_interpolations(interpolations, grid_pts, legend.lab = "Average Temperatures (Celsius)", main = "Interpolated Average Temperatures for March 2024")
 ```
-    
+
 3.  *Estimate the warmest and coldest day of the year for each station,
     and plot those days on two maps. Think carefully about how to
-    represent the days numerically. In your report, describe the
-    statistical analysis that you used for estimating the warmest and
-    coldest days at each station, including writing down any statistical
-    models in mathematical notation. Be sure to define all your symbols
-    and assumptions. 2 Interpolate maps of the warmest and coldest days,
-    and plot the interpolated maps of warmest and coldest days.*
+    represent the days numerically.*
+
+*In your report, describe the statistical analysis that you used for
+estimating the warmest and coldest days at each station, including
+writing down any statistical models in mathematical notation. Be sure to
+define all your symbols and assumptions.*
+
+*Interpolate maps of the warmest and coldest days, and plot the
+interpolated maps of warmest and coldest days.*
+
+```{r}
+stations <- station_data$station_name
+lowest_highest <- matrix(NA, length(stations), 2)
+colnames(lowest_highest) <- c("lowest", "highest")
+
+for(i in 1:length(stations)){
+  station <- stations[i]
+  station_daily_data <- daily_weather_data[daily_weather_data$station_name == station, ]
+  cycle <- yearly_cycle(station_daily_data) #this gives us tibble of yearly cycle
+  lowest_highest[i, "lowest"] <- which.min(cycle$expected_avg_temp)
+  lowest_highest[i, "highest"] <- which.max(cycle$expected_avg_temp)
+ 
+}
+lowest_highest
+
+station_data
+```
+
+Statistical Analysis:
+
+To estimate the warmest and coldest days at each station, we first
+create a model to predict the cyclical temperature based on all the
+provided data for that specific station. Our model is as follows:
+$y_i = sin (2 *\pi *x_i / 365.25) + cos(2* \pi *x_i / 365.25) + \epsilon_i$
+
+Here, $x_i$ represents the day of the year since January 1st, $y_i$
+represents the average daily temperature (T_DAILY_AVG). We use the trig
+functions to account for temperature fluctuations in a cyclical manner
+throughout the year, using a period of $365.25$ to represent the number
+of days in year, while also accounting for leap years.
+
+Note that before we trained the model, we removed all instances of leap
+years to ensure that all March 1 (and all days afterwards) data points
+are considered together in their expected average temperature.
+
+Afterwards, we use our fitted model to predict the expected daily
+average temperature for each day (1 through 365) for that specific
+station. We did this by obtaining the sine and cosine terms for each day
+(1 through 365).
+
+To then obtain the warmest and coldest day in the cycle, we simply
+extracted the minimum and maximum of each cycle.
+
+```{r}
+grid_pts <- create_grid_pts()
+
+#interpolate lowest
+interpolations_lowest <- interpolate_grid_pts(station_locs = station_data[,c("LONGITUDE", "LATITUDE")], 
+                     interpolation_data = lowest_highest[, "lowest"], 
+                     grid_pts = grid_pts[,c(1,2)])
+
+plot_interpolations(interpolations_lowest, grid_pts, legend.lab = "Day of Year Since Jan. 1", main = "Coldest Days at Each Station")
+```
+
+```{r}
+#interpolate highest
+interpolations_highest <- interpolate_grid_pts(station_locs = station_data[,c("LONGITUDE", "LATITUDE")], 
+                     interpolation_data = lowest_highest[, "highest"], 
+                     grid_pts = grid_pts[,c(1,2)])
+plot_interpolations(interpolations_highest, grid_pts, legend.lab = "Day of Year Since Jan. 1", main = "Warmest Days at Each Station")
+
+```
+
 4.  *Make a single plot of the estimated yearly cycles for 10 different
     stations, highlighting a diversity of climates around the contiguous
     USA. Your plot should clearly indicate which cycle is from which
     station.*
+
+```{r}
+ten_stations <- c(53878, 64758, 53152, 23907, 63856, 4136, 54808, 94996, 94075, 53960)
+#for each station id: get the name and state
+#NC_Asheville_13_S, NY_Ithaca_13_E, CA_Santa_Barbara_11_W, TX_Austin_33_NW, GA_Brunswick_23_S, WA_Spokane_17_SSW, IL_Champaign_9_SW, NE_Lincoln_11_SW, CO_Boulder_14_W, LA_Lafayette_13_SE
+ten_station_name = c("NC_Asheville_13_S", "NY_Ithaca_13_E", "CA_Santa_Barbara_11_W", "TX_Austin_33_NW", "GA_Brunswick_23_S", "WA_Spokane_17_SSW", "IL_Champaign_9_SW", "NE_Lincoln_11_SW", "CO_Boulder_14_W", "LA_Lafayette_13_SE")
+
+i <- 1
+cycles <- matrix(NA, nrow = 365, ncol = 10)
+
+for (id in ten_stations){
+  station_daily_data <- daily_weather_data[daily_weather_data$WBANNO == id, ]
+  cycles[,i] <- yearly_cycle(station_daily_data)[["expected_avg_temp"]]
+  i = i + 1
+}
+
+colors <- rainbow(10)
+matplot(1:365, cycles, type = "l", col = colors, xlab = "Days", ylab  = "Expected Average Temperature", main = "Estimated Yearly Cycle for 10 different stations", cex  = 1, .main = 0.9)
+legend(x = "top", legend = ten_station_name, col=colors, 
+       lwd = 10, cex = 0.5, ncol = 5, xpd = TRUE, inset = c(1, 1.1))
+
+```
+
 5.  *Estimate the trend over the years for each station, in units of
-    degrees Fahrenheit per year, and plot the trend values on a map.
+    degrees Celsius per year, and plot the trend values on a map.
     Indicate visually on your map which of the trends are statistically
     significant. In your report, write the statistical model that you
     used in mathematical notation. Be sure to define all your symbols
-    and assumptions. Interpolate the estimated trends to a grid, and
-    plot them on a map. For the interpolations, you may consider using
-    only the trend estimates whose standard errors are sufficiently
-    small.*
+    and assumptions.*
+
+    *Interpolate the estimated trends to a grid, and plot them on a map.
+    For the interpolations, you may consider using only the trend
+    estimates whose standard errors are sufficiently small.*
+
+```{r}
+stations <- station_data$station_name
+trend_estimates <- matrix(NA, nrow = length(stations), ncol = 3)
+colnames(trend_estimates) <- c("Coefficient", "Std. Error", "P-value")
+
+i <- 1
+for (station in stations){
+  station_daily_data <- daily_weather_data[daily_weather_data$station_name == station, ]
+  
+  trend_estimates[i, ] <- trend_estimate(station_daily_data)
+  i = i + 1
+}
+
+#For my plot, I will disregard the SA Tiksi station, as that is in Russia and 
+# causes the map to zoom out of all other US locations
+not_SA <- which(stations != "SA_Tiksi_4_SSE")
+trend_estimates_not_SA <- trend_estimates[not_SA,]
+
+#indicating statistical significance
+significant_stations <- which(trend_estimates_not_SA[,3] < 0.05)
+
+trend_range <- range(trend_estimates_not_SA[, "Coefficient"]) 
+#ensures that both of the following plots have the same scale
+
+#significant station are circles
+#non-significant stations are squares
+long_numeric <- as.numeric(station_data[not_SA,]$LONGITUDE)
+lat_numeric <- as.numeric(station_data[not_SA,]$LATITUDE)
+
+
+fields::bubblePlot(long_numeric[significant_stations], 
+                   lat_numeric[significant_stations], 
+                   trend_estimates_not_SA[significant_stations,"Coefficient"], 
+                   col = fields::tim.colors(64), 
+                   xlab = "Longitude", ylab = "Latitude", 
+                   legend.lab = "Trend (Celsius per Year)", 
+                   main = "Trend Estimate for Each Station", 
+                   zlim = trend_range)
+
+fields::quilt.plot(long_numeric[-significant_stations], 
+                  lat_numeric[-significant_stations], 
+                  trend_estimates_not_SA[-significant_stations,"Coefficient"], 
+                  col = fields::tim.colors(64),
+                  zlim = trend_range, add = TRUE, size = 2)
+legend("topright", legend = c("Significant", "Not Significant"), 
+       pch = c(16, 15), col = "black")
+
+#do another plot without those two in alaska that mess up our scale
+```
+
+Statistical Analysis:
+Assumptions: we want the linear trend, but in reality the trend is not linear when examining change in temperature since a certain date, as it is best represented by sine and cosine.
+
+
+```{r}
+#Interpolation
+
+#We will consider the standard errors that are sufficiently small to be the ones below 0.1.
+
+is_small_se <- which(trend_estimates[,"Std. Error"] < 0.1)
+station_data[is_small_se, c("LONGITUDE", "LATITUDE")]
+
+trend_small_se <- trend_estimates[is_small_se, "Coefficient"]
+
+grid_pts <- create_grid_pts()
+
+interpolations_trend <- interpolate_grid_pts(
+  station_locs = station_data[is_small_se, c("LONGITUDE", "LATITUDE")],
+  interpolation_data = trend_small_se,
+  grid_pts = grid_pts[,c(1,2)]
+)
+
+plot_interpolations(interpolations_trend, grid_pts, legend.lab = "Trend (Celsius per Year)", main = "Trend Interpolations")
+```
+
 6.  *Find a reputable source for the average temperature trend in the
     contiguous USA over the past 20 years, and compare your results to
     the source’s.*
+
+https://www.epa.gov/climate-indicators/climate-change-indicators-us-and-global-temperature
+https://www.climate.gov/news-features/blogs/beyond-data/mapping-us-climate-trends
+https://www.weather.gov/media/slc/ClimateBook/Annual%20Average%20Temperature%20By%20Year.pdf
+https://ntrs.nasa.gov/api/citations/20180001314/downloads/20180001314.pdf
+

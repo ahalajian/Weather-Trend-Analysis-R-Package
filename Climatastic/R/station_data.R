@@ -3,7 +3,7 @@
 #' A dataset with the data for all USCRN stations, including their station
 #' identifier, longitude, latitude, station name, and state.
 #'
-#' @format a dataframe with 237 rows and 5 columns
+#' @format a dataframe with 236 rows and 5 columns
 #' \describe{
 #'     \item{WBANNO}{station WBAN number}
 #'     \item{station_name}{name of the USCRN station}

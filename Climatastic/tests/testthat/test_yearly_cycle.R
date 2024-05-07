@@ -5,8 +5,8 @@ test_that("test yearly cycle (1)", {
 
   #checking that dataframe has 366 rows and range from 1-366
   expect_equal(
-    c(nrow(cycle), all(cycle$day == 1:366)),
-    c(366, TRUE)
+    c(nrow(cycle), all(cycle$day == 1:365)),
+    c(365, TRUE)
   )
 
   #type checking output and one of the output columns
@@ -22,8 +22,8 @@ test_that("test yearly cycle (2)", {
   cycle <- yearly_cycle(station_daily_data)
 
   expect_equal(
-    c(nrow(cycle), all(cycle$day == 1:366)),
-    c(366, TRUE)
+    c(nrow(cycle), all(cycle$day == 1:365)),
+    c(365, TRUE)
   )
 
   expect_equal(

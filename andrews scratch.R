@@ -31,3 +31,14 @@ devtools::check()
 #average temperature for each station
 station_data
 yearly_cycle()
+
+
+newdata <- data.frame(sin(2*pi*(1:100)/365.25), cos(2*pi*1:100/365.25))
+newdata
+
+#predicting using the fitted values
+pred_o <- stats::predict(model_trig, newdata = newdata)
+all(pred_o == pred)
+pred_new
+
+length(tapply(pred, day, mean))

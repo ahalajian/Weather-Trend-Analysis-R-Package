@@ -5,7 +5,7 @@
 \alias{daily_weather_data}
 \title{Daily Weather Data of USCRN Stations}
 \format{
-a dataframe with 1134352 rows and 13 columns
+a dataframe with 1134351 rows and 13 columns
 \describe{
     \item{WBANNO}{station WBAN number}
     \item{LST_DATE}{the Local Standard Time (LST) date of the observation.}
